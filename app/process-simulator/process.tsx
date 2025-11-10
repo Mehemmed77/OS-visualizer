@@ -7,14 +7,15 @@ import { Trash2 } from "lucide-react";
 interface ProcessProps {
   process: ProcessListItem;
   handleChange: (pid: number, field: string, value: number) => any;
+  handleDelete: (pid: number) => any;
 }
 
-export default function Process({ process, handleChange }: ProcessProps) {
+export default function Process({ process, handleChange, handleDelete }: ProcessProps) {
   return (
     <div className="border border-color-os-border bg-color-os-background text-color-os-foreground p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between">
         <div className="min-w-[100px] font-semibold">{process.name}</div>
-        <button
+        <button onClick={() => handleDelete(process.pid)}
           className="text-color-os-terminated hover:text-color-os-waiting transition-colors cursor-pointer p-2 rounded-full hover:bg-color-os-surface"
           title="Delete process"
         >
