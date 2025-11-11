@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ProcessListItem } from "./types";
 import Process from "./process";
 import ProcessTable from "./process-table";
+import scheduler from "./utils/scheduler";
 
 function generateRandomPID() {
   return Math.floor(Math.random() * 4194304) + 1;
@@ -65,6 +66,7 @@ export default function ProcessCreator() {
   const start = () => {
     setNewProcessDisabled(true);
     setShowProcessTable(true);
+    console.log(scheduler(processList));
   };
 
   return (

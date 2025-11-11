@@ -71,14 +71,12 @@ export default function ProcessTable( {time, processList}: ProcessTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {invoices.map(() => (
           <TableRow>
             {/* <TableCell className="font-medium">{invoice.invoice}</TableCell>
             <TableCell>{invoice.paymentStatus}</TableCell>
             <TableCell>{invoice.paymentMethod}</TableCell>
             <TableCell className="text-right">{invoice.totalAmount}</TableCell> */}
           </TableRow>
-        ))}
       </TableBody>
       {/* <TableFooter>
         <TableRow>
