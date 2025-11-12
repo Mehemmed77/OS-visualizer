@@ -7,17 +7,24 @@ export default function scheduler(processList: ProcessListItem[]) {
     let n = 1;
     let process_count = 0;
     for(const process of processes) {
-        for(let i = 0; i < process.cpuTasks; i++) {
+        const cpuTasks = process.cpuTasks;
+        for(let i = 0; i < cpuTasks; i++) {
+            console.log(process.name, process.cpuTasks);
+            process.cpuTasks -= 1;
             const pid = process.pid;
-            const task = {
+
+            const task: Record<string, number | string> = {
                 time: n,
-                [`process_${process_count}`]: "RUNNING",
             };
 
             processes.forEach((p, index) => {
+                const key = `process_${index}`;
                 if (p.pid !== pid) {
-                    task[`process_${index}`] = "READY";
+                    if (process.cpuTasks <= 0) task[key] = "-";
+                    else task[key] = "READY";
                 }
+
+                else task[key] = "RUNNING";
             });
 
             tasks.push(task);
