@@ -10,7 +10,7 @@ interface ProcessProps {
   handleDelete: (pid: number) => any;
 }
 
-export default function Process({ process, handleChange, handleDelete }: ProcessProps) {
+export default function ProcessItem({ process, handleChange, handleDelete }: ProcessProps) {
   return (
     <div className="border border-color-os-border bg-color-os-background text-color-os-foreground p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between">
@@ -25,19 +25,27 @@ export default function Process({ process, handleChange, handleDelete }: Process
       <hr className="my-2 border-color-os-border" />
       <div className="flex flex-wrap items-center gap-6">
         <NumberInput
-          title="# of CPU instructions"
-          value={process.cpuTasks}
-          onChange={(value) => handleChange(process.pid, "cpuTasks", value)}
+          title="# CPU total"
+          value={process.cpuTotal}
+          onChange={(value) => handleChange(process.pid, "cpuTotal", value)}
         />
+
         <NumberInput
-          title="# of I/O operations"
-          value={process.ioOperations}
-          onChange={(value) => handleChange(process.pid, "ioOperations", value)}
+          title="# I/O total"
+          value={process.ioTotal}
+          onChange={(value) => handleChange(process.pid, "ioTotal", value)}
         />
+
         <NumberInput
-          title="Frequency"
-          value={process.frequency}
-          onChange={(value) => handleChange(process.pid, "frequency", value)}
+          title="CPU Burst Interval"
+          value={process.cpuBurstInterval}
+          onChange={(value) => handleChange(process.pid, "cpuBurstInterval", value)}
+        />
+
+        <NumberInput
+          title="IO Burst Interval"
+          value={process.ioBurstInterval}
+          onChange={(value) => handleChange(process.pid, "ioBurstInterval", value)}
         />
       </div>
     </div>

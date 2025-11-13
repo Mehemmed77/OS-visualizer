@@ -2,10 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Divide, Plus, Table2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ProcessListItem } from "./types";
-import Process from "./process";
+import { BurstItem, BurstType, ProcessListItem } from "./types";
+import ProcessItem from "./process";
 import ProcessTable from "./process-table";
 import scheduler from "./utils/scheduler";
+import Process from "./core/process";
 
 function generateRandomPID() {
   return Math.floor(Math.random() * 4194304) + 1;
@@ -25,10 +26,10 @@ export default function ProcessCreator() {
 
   useEffect(() => {
     if (showProcessTable && processTableRef.current) {
-        processTableRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        })
+      processTableRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   }, [showProcessTable]);
 
@@ -39,9 +40,10 @@ export default function ProcessCreator() {
     const newProcess: ProcessListItem = {
       name: `PID_${pid}`,
       pid: pid,
-      cpuTasks: 0,
-      ioOperations: 0,
-      frequency: 0,
+      cpuTotal: 0,
+      ioTotal: 0,
+      cpuBurstInterval: 0,
+      ioBurstInterval: 0,
     };
 
     setProcessList((prev) => [...prev, newProcess]);
@@ -66,7 +68,48 @@ export default function ProcessCreator() {
   const start = () => {
     setNewProcessDisabled(true);
     setShowProcessTable(true);
-    console.log(scheduler(processList));
+
+    const processes: Process[] = [];
+
+    processList.forEach((p) => {
+      const bursts: BurstItem[] = [];
+      let cpuTotal = p.cpuTotal;
+      let ioTotal = p.ioTotal;
+      let type: BurstType = "CPU";
+
+      while (cpuTotal > 0) {
+        let length = 0;
+
+        if (type === "CPU") {
+          if (cpuTotal > 0) {
+            if (ioTotal === 0) length = cpuTotal;
+            else length = Math.min(p.cpuBurstInterval, cpuTotal);
+
+            cpuTotal -= length;
+          }
+
+          else break;
+        }
+
+        else {
+          if (ioTotal > 0) {
+            length = Math.min(p.ioBurstInterval, ioTotal);
+            ioTotal -= length;
+          }
+        }
+
+        if (length > 0) {
+          bursts.push({
+            type: type,
+            length: length,
+          });
+        }
+
+        type = type === "CPU" ? "IO" : "CPU";
+      }
+
+      processes.push(new Process(p, bursts));
+    });
   };
 
   return (
@@ -102,7 +145,7 @@ export default function ProcessCreator() {
         <hr className="my-3 border-color-os-border" />
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
           {processList.map((p) => (
-            <Process
+            <ProcessItem
               key={p.pid}
               process={p}
               handleChange={handleChange}
