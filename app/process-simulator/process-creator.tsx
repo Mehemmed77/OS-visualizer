@@ -68,48 +68,6 @@ export default function ProcessCreator() {
   const start = () => {
     setNewProcessDisabled(true);
     setShowProcessTable(true);
-
-    const processes: Process[] = [];
-
-    processList.forEach((p) => {
-      const bursts: BurstItem[] = [];
-      let cpuTotal = p.cpuTotal;
-      let ioTotal = p.ioTotal;
-      let type: BurstType = "CPU";
-
-      while (cpuTotal > 0) {
-        let length = 0;
-
-        if (type === "CPU") {
-          if (cpuTotal > 0) {
-            if (ioTotal === 0) length = cpuTotal;
-            else length = Math.min(p.cpuBurstInterval, cpuTotal);
-
-            cpuTotal -= length;
-          }
-
-          else break;
-        }
-
-        else {
-          if (ioTotal > 0) {
-            length = Math.min(p.ioBurstInterval, ioTotal);
-            ioTotal -= length;
-          }
-        }
-
-        if (length > 0) {
-          bursts.push({
-            type: type,
-            length: length,
-          });
-        }
-
-        type = type === "CPU" ? "IO" : "CPU";
-      }
-
-      processes.push(new Process(p, bursts));
-    });
   };
 
   return (

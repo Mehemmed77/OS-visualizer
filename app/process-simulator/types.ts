@@ -7,7 +7,7 @@ export interface ProcessListItem {
     ioBurstInterval: 0,
 }
 
-export type STATE = "READY" | "RUNNING" | "BLOCKED" | "DONE";
+export type STATE = "NEW" | "READY" | "RUNNING" | "BLOCKED" | "TERMINATED";
 
 export type ACTION = "IO_DONE" | "CPU_DONE" | "START_IO" | "START_CPU" | undefined;
 
