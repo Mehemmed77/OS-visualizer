@@ -9,12 +9,12 @@ export interface ProcessListItem {
 
 export type STATE = "NEW" | "READY" | "RUNNING" | "BLOCKED" | "TERMINATED";
 
-export type ACTION = "IO_DONE" | "CPU_DONE" | "START_IO" | "START_CPU" | undefined;
+export type EventType = "CPU_DONE" | "IO_DONE";
 
 export interface EventItem {
     time: number;
     pid: number;
-    action: ACTION;
+    type: EventType;
 }
 
 export type BurstType = "CPU" | "IO";

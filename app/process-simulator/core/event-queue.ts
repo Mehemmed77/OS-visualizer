@@ -1,17 +1,40 @@
-import { ACTION, EventItem } from "../types";
+import FastPriorityQueue from "fastpriorityqueue";
+import { EventType, EventItem } from "../types";
 import Process from "./process";
 
 export default class EventQueue {
-    events: EventItem[] = [];
+    static events = new FastPriorityQueue<EventItem>((a, b) => a.time < b.time);
 
-    scheduleEndEvent(time: number, process: Process, action: ACTION) {
-        let endTime = action === "START_IO" ? time + process.currentIoBurstRemaining : time + process.currentCpuBurstRemaining;
-        let endAction: ACTION = action === "START_IO" ? "IO_DONE" : "CPU_DONE";
+    static scheduleCpuDone(time: number, process: Process) {
+        const endTime = time + process.currentCpuBurstRemaining;
 
-        this.events.push({
+        EventQueue.events.add({
             time: endTime,
             pid: process.pid,
-            action: endAction,
-        })
+            type: "CPU_DONE"
+        });
+    }
+
+    static scheduleIoDone(time: number, process: Process) {
+        const endTime = time + process.currentIoBurstRemaining;
+
+        EventQueue.events.add({
+            time: endTime,
+            pid: process.pid,
+            type: "IO_DONE"
+        });
+    }
+
+    static getEventsAtAndRemove(time: number) {
+        // I combined both getEventsAt and RemoveEventsAt
+        const events: EventItem[] = [];
+        let e = EventQueue.events.peek();
+        while (e?.time === time) {
+            events.push(e);
+            EventQueue.events.poll();
+            e = EventQueue.events.peek();
+        }
+
+        return events;
     }
 }
