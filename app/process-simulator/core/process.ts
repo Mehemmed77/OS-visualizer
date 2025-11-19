@@ -8,6 +8,7 @@ export default class Process {
   currentIoBurstRemaining: number = 0;
   burstIndex = 0;
   bursts: BurstItem[] = [];
+  totalBurstTime = 0;
 
   startCpuBurst() {
     this.state = "RUNNING";
@@ -79,6 +80,7 @@ export default class Process {
       }
 
       if (length > 0) {
+        this.totalBurstTime += length;
         bursts.push({
           type: type,
           length: length,

@@ -6,8 +6,9 @@ export default class Scheduler {
   runningProcess: Process | null = null;
   mode: string;
 
-  constructor(mode: string) {
+  constructor(mode: string, processList: Process[]) {
     this.mode = mode;
+    this.init(processList);
   }
 
   init(processList: Process[]) {
