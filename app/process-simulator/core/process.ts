@@ -16,7 +16,7 @@ export default class Process {
   }
 
   finishCpuBurst() {
-    if (this.burstIndex === this.bursts.length) {
+    if (this.burstIndex + 1 === this.bursts.length) {
       this.state = "TERMINATED";
       return;
     }

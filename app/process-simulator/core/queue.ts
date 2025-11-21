@@ -1,4 +1,4 @@
-class Queue<T> {
+export default class Queue<T> {
   items: T[] = [];
 
   constructor() {

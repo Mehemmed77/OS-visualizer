@@ -1,5 +1,6 @@
 import EventQueue from "./event-queue";
 import Process from "./process";
+import Queue from "./queue";
 
 export default class Scheduler {
   readyQueue: Queue<Process> = new Queue();

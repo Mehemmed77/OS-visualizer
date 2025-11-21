@@ -25,14 +25,16 @@ export default class EventQueue {
         });
     }
 
-    static getEventsAtAndRemove(time: number) {
-        // I combined both getEventsAt and RemoveEventsAt
+    static getNextEvents() {
+        if (EventQueue.events.isEmpty()) return [];
+
         const events: EventItem[] = [];
-        let e = EventQueue.events.peek();
-        while (e?.time === time) {
-            events.push(e);
-            EventQueue.events.poll();
-            e = EventQueue.events.peek();
+        let first = EventQueue.events.peek();
+        const earliestTime = first?.time;
+
+        // Collect all events with this exact same time
+        while (!EventQueue.events.isEmpty() && EventQueue.events.peek()?.time === earliestTime) {
+            events.push(EventQueue.events.poll() as EventItem);
         }
 
         return events;

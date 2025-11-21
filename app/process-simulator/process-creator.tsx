@@ -7,6 +7,7 @@ import ProcessItem from "./process";
 import ProcessTable from "./process-table";
 import scheduler from "./utils/scheduler";
 import Process from "./core/process";
+import SimulationEngine from "./core/simulation-engine";
 
 function generateRandomPID() {
   return Math.floor(Math.random() * 4194304) + 1;
@@ -68,6 +69,9 @@ export default function ProcessCreator() {
   const start = () => {
     setNewProcessDisabled(true);
     setShowProcessTable(true);
+
+    const simulationEngine = new SimulationEngine(processList, "FCFS");
+    simulationEngine.runUntilFinished();
   };
 
   return (

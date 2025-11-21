@@ -23,38 +23,52 @@ export default class SimulationEngine {
     }
 
     runStep() {
-        const events = EventQueue.getEventsAtAndRemove(this.time);
-        this.handleEvents(events);
+        const events = EventQueue.getNextEvents();
+
+        if (events.length === 0) return;
+
+        const nextTime = events[0].time;
         
-        for(const process of this.processes) {
+        for(let t = this.time; t < nextTime; t++) {
+            this.createSnapshot(t);
         }
+
+        this.time += nextTime;
+        this.handleEvents(events);
+        this.dispatchCpuIfIdle();
     }
 
     handleEvents(events: EventItem[]) {
         for(const event of events) {
             const process = this.processes.find(p => p.pid === event.pid);
             if (!process) continue;
-
-            if (event.type === "CPU_DONE") this.handleCpuDone(process);
-
+            
+            if (event.type === "CPU_DONE") {
+                this.handleCpuDone(process);
+            }
+            
             else if (event.type === "IO_DONE") this.handleIoDone(process);
         }
     }
 
+    createSnapshot(t: number) {
+        console.log(this.processes);
+    }
+    
     handleCpuDone(process: Process) {
         process.finishCpuBurst();
         if (process.state !== "TERMINATED") {
             this.scheduler.setProcessBlocked();
         }
     }
-
+    
     handleIoDone(process: Process) {
         process.finishIoBurst();
         if (process.state !== "TERMINATED") {
             this.scheduler.onProcessArrive(process);
         }
     }
-
+    
     dispatchCpuIfIdle() {
         if (!this.scheduler.isCpuIdle()) return null;
         const process = this.scheduler.selectNextProcess();
@@ -64,17 +78,10 @@ export default class SimulationEngine {
         EventQueue.scheduleCpuDone(this.time, process);
     }
 
-    isSimulationFinished() {
-
-    }
-
     runUntilFinished() {
-        while (this.totalTimeRemaining > this.time) {
-            
-            
-            
-            
-            this.time += 1;
+        this.dispatchCpuIfIdle();
+        while (!EventQueue.events.isEmpty()) {
+            this.runStep();
         }
     }
 }
