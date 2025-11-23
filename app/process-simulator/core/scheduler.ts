@@ -37,18 +37,26 @@ export default class Scheduler {
   }
 
   selectNextProcess() {
-    if (this.mode === "FCFS") return this.fcfs();
-    if (this.mode === "SJF") return this.sjf();
-    if (this.mode === "RR") return this.rr();
+    if (this.mode === "FCFS") this.fcfs();
+    else if (this.mode === "SJF") this.sjf();
+    else if (this.mode === "RR") this.rr();
+
+    return this.runningProcess;
   }
 
-  setProcessBlocked() {
+  setProcessBlocked(process: Process) {
     if (!this.runningProcess) return null;
-
     const p = this.runningProcess;
     p.state = "BLOCKED";
     this.runningProcess = null;
     return p;
+  }
+
+  terminateProcess() {
+    if(!this.runningProcess) return null;
+    const p = this.runningProcess;
+    p.state = "TERMINATED";
+    this.runningProcess = null;
   }
 
   isCpuIdle() {
@@ -56,7 +64,7 @@ export default class Scheduler {
   }
 
   fcfs() {
-    return this.readyQueue.dequeue();
+    this.runningProcess = this.readyQueue.dequeue();
   }
 
   sjf() {

@@ -1,87 +1,113 @@
+import { TruckElectric } from "lucide-react";
 import { EventItem, ProcessListItem } from "../types";
 import EventQueue from "./event-queue";
 import Process from "./process";
 import Scheduler from "./scheduler";
 
 export default class SimulationEngine {
-    totalTimeRemaining = 0; // Calculated from overall bursts of all processes during hydration.
-    time = 0; // Where we are at right now.
-    processes: Process[] = [];
-    scheduler: Scheduler;
+  totalTimeRemaining = 0; // Calculated from overall bursts of all processes during hydration.
+  time = 0; // Where we are at right now.
+  processes: Process[] = [];
+  scheduler: Scheduler;
+  isTerminated: Record<number, boolean> = {};
 
-    constructor(processList: ProcessListItem[], schedulerMode: string) {
-        this.hydrate(processList);
-        this.scheduler = new Scheduler(schedulerMode, this.processes);
-    }
-    
-    hydrate(processList: ProcessListItem[]) {
-        processList.forEach(p => {
-            const newProcess = new Process(p);
-            this.processes.push(newProcess);
-            this.totalTimeRemaining += newProcess.totalBurstTime;
-        });
-    }
+  constructor(processList: ProcessListItem[], schedulerMode: string) {
+    this.hydrate(processList);
+    this.scheduler = new Scheduler(schedulerMode, this.processes);
+  }
 
-    runStep() {
-        const events = EventQueue.getNextEvents();
+  hydrate(processList: ProcessListItem[]) {
+    processList.forEach((p) => {
+      const newProcess = new Process(p);
+      this.isTerminated[newProcess.pid] = false;
+      this.processes.push(newProcess);
+      this.totalTimeRemaining += newProcess.totalBurstTime;
+    });
+  }
 
-        if (events.length === 0) return;
+  runStep() {
+    const events = EventQueue.getNextEvents();
 
-        const nextTime = events[0].time;
-        
-        for(let t = this.time; t < nextTime; t++) {
-            this.createSnapshot(t);
-        }
+    if (events.length === 0) return;
 
-        this.time += nextTime;
-        this.handleEvents(events);
-        this.dispatchCpuIfIdle();
+    const nextTime = events[0].time;
+
+    for (let t = this.time; t < nextTime; t++) {
+      this.createSnapshot(t);
     }
 
-    handleEvents(events: EventItem[]) {
-        for(const event of events) {
-            const process = this.processes.find(p => p.pid === event.pid);
-            if (!process) continue;
-            
-            if (event.type === "CPU_DONE") {
-                this.handleCpuDone(process);
-            }
-            
-            else if (event.type === "IO_DONE") this.handleIoDone(process);
-        }
-    }
+    this.time = nextTime;
+    this.handleEvents(events);
+    this.dispatchCpuIfIdle();
+  }
 
-    createSnapshot(t: number) {
-        console.log(this.processes);
-    }
-    
-    handleCpuDone(process: Process) {
-        process.finishCpuBurst();
-        if (process.state !== "TERMINATED") {
-            this.scheduler.setProcessBlocked();
-        }
-    }
-    
-    handleIoDone(process: Process) {
-        process.finishIoBurst();
-        if (process.state !== "TERMINATED") {
-            this.scheduler.onProcessArrive(process);
-        }
-    }
-    
-    dispatchCpuIfIdle() {
-        if (!this.scheduler.isCpuIdle()) return null;
-        const process = this.scheduler.selectNextProcess();
-        if (!process) return null;
+  handleEvents(events: EventItem[]) {
+    for (const event of events) {
+      const process = this.processes.find((p) => p.pid === event.pid);
+      if (!process) continue;
 
-        process.startCpuBurst();
-        EventQueue.scheduleCpuDone(this.time, process);
+      if (event.type === "CPU_DONE") {
+        this.handleCpuDone(process);
+      } else if (event.type === "IO_DONE") this.handleIoDone(process);
     }
+  }
 
-    runUntilFinished() {
-        this.dispatchCpuIfIdle();
-        while (!EventQueue.events.isEmpty()) {
-            this.runStep();
-        }
+  createSnapshot(t: number) {
+    console.log(
+      this.processes.map((p) => ({
+        pid: p.pid,
+        name: p.name,
+        state: p.state,
+        burstIndex: p.burstIndex,
+        cpuLeft: p.currentCpuBurstRemaining,
+        ioLeft: p.currentIoBurstRemaining,
+      }))
+    );
+  }
+
+  handleCpuDone(process: Process) {
+    process.finishCpuBurst();
+    if (process.state !== "TERMINATED") {
+      this.scheduler.setProcessBlocked(process);
+      process.startIoBurst();
+      EventQueue.scheduleIoDone(this.time, process)
+      console.log("CPU DONE FOR ", process.pid);
     }
+    else{
+      this.scheduler.terminateProcess();
+    }
+  }
+
+  handleIoDone(process: Process) {
+    process.finishIoBurst();
+    if (process.state !== "TERMINATED") {
+      this.scheduler.onProcessArrive(process);
+    }
+  }
+
+  dispatchCpuIfIdle() {
+    if (!this.scheduler.isCpuIdle()) return null;
+    const process = this.scheduler.selectNextProcess();
+    if (!process) return null;
+
+    process.startCpuBurst();
+    EventQueue.scheduleCpuDone(this.time, process);
+  }
+
+  isFinished() {
+    return Object.values(this.isTerminated).some(b => b === false);
+  }
+
+  runUntilFinished() {
+    let count = 0;
+    this.dispatchCpuIfIdle();
+    while (!EventQueue.events.isEmpty() ||
+    !this.scheduler.isCpuIdle() ||
+    !this.scheduler.readyQueue.isEmpty()) {
+      if (count >= 1000) break;
+
+      this.runStep();
+      count++;
+    }
+  }
 }

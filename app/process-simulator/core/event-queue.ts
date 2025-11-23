@@ -32,7 +32,6 @@ export default class EventQueue {
         let first = EventQueue.events.peek();
         const earliestTime = first?.time;
 
-        // Collect all events with this exact same time
         while (!EventQueue.events.isEmpty() && EventQueue.events.peek()?.time === earliestTime) {
             events.push(EventQueue.events.poll() as EventItem);
         }

@@ -23,7 +23,6 @@ export default class Process {
 
     this.currentCpuBurstRemaining = 0;
     this.burstIndex++;
-    this.checkForNextBurst();
   }
 
   startIoBurst() {
@@ -36,11 +35,8 @@ export default class Process {
       this.state = "TERMINATED";
       return;
     }
-
     this.currentIoBurstRemaining = 0;
     this.burstIndex++;
-
-    this.checkForNextBurst();
   }
 
   checkForNextBurst() {
