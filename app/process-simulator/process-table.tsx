@@ -8,7 +8,7 @@ import {
   TableRow,
   TableFooter
 } from "@/components/ui/table"
-import { ProcessListItem } from "./types"
+import { ProcessListItem, snapshotItem } from "./types"
 
 const invoices = [
   {
@@ -57,20 +57,40 @@ const invoices = [
 
 interface ProcessTableProps {
   time: number,
-  processList: ProcessListItem[]
+  snapshots: snapshotItem[]
 }
 
-export default function ProcessTable( {time, processList}: ProcessTableProps) {
+export default function ProcessTable( {time, snapshots}: ProcessTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="w-[100px]">Time</TableHead>
-          <TableHead className="font-bold">Process_0</TableHead>
-          <TableHead className="text-right">Notes</TableHead>
+
+          {(Object.keys(snapshots[0]) as (keyof snapshotItem)[]).map(k => {
+            if (k !== "time" && k !== "notes") {
+              return <TableHead key={k} className="font-bold">{ k }</TableHead>
+            }
+          })}
+
+          <TableHead>Notes</TableHead>
+
         </TableRow>
       </TableHeader>
       <TableBody>
+          {snapshots.map(snapshot => (
+            <TableRow key={snapshot.time}>
+              {
+                (Object.keys(snapshot) as (keyof snapshotItem)[]).map(s => {
+                  return (
+                    <TableCell key={s} className={
+                        (s !== "time" && s !== "notes") ? "font-medium" : ""
+                    }>{snapshot[s]}</TableCell>
+                  )
+                })
+              }
+            </TableRow>
+          ))}
           <TableRow>
             {/* <TableCell className="font-medium">{invoice.invoice}</TableCell>
             <TableCell>{invoice.paymentStatus}</TableCell>

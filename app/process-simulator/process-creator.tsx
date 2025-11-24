@@ -2,10 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Divide, Plus, Table2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { BurstItem, BurstType, ProcessListItem } from "./types";
+import { BurstItem, BurstType, ProcessListItem, snapshotItem } from "./types";
 import ProcessItem from "./process";
 import ProcessTable from "./process-table";
-import scheduler from "./utils/scheduler";
 import Process from "./core/process";
 import SimulationEngine from "./core/simulation-engine";
 
@@ -18,6 +17,7 @@ export default function ProcessCreator() {
   const [newProcessdisabled, setNewProcessDisabled] = useState<boolean>(false);
   const [startDisabled, setStartDisabled] = useState<boolean>(true);
   const [showProcessTable, setShowProcessTable] = useState<boolean>(false);
+  const [snapshots, setSnapshots] = useState<snapshotItem[]>([]);
   const processTableRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -71,7 +71,9 @@ export default function ProcessCreator() {
     setShowProcessTable(true);
 
     const simulationEngine = new SimulationEngine(processList, "FCFS");
-    simulationEngine.runUntilFinished();
+    const newSnapshots = simulationEngine.runUntilFinished();
+
+    setSnapshots(newSnapshots);
   };
 
   return (
@@ -122,7 +124,7 @@ export default function ProcessCreator() {
             <div className="my-4">
               <p className="text-center text-3xl">Processes</p>
             </div>
-            <ProcessTable time={0} processList={processList} />
+            <ProcessTable time={0} snapshots={snapshots} />
           </>
         )}
       </div>

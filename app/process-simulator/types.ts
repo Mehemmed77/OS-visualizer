@@ -23,3 +23,12 @@ export type BurstItem = {
     type: BurstType,
     length: number,
 }
+
+type ProcessCount = 5;
+
+export type snapshotItem = {
+    time: number;
+    notes?: string ;
+} & {
+    [K in `process_${number}`]?: STATE | null;
+}

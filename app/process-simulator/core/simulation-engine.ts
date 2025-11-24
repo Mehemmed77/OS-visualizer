@@ -1,5 +1,5 @@
 import { TruckElectric } from "lucide-react";
-import { EventItem, ProcessListItem } from "../types";
+import { EventItem, ProcessListItem, snapshotItem } from "../types";
 import EventQueue from "./event-queue";
 import Process from "./process";
 import Scheduler from "./scheduler";
@@ -10,6 +10,7 @@ export default class SimulationEngine {
   processes: Process[] = [];
   scheduler: Scheduler;
   isTerminated: Record<number, boolean> = {};
+  snapshots: snapshotItem[] = [];
 
   constructor(processList: ProcessListItem[], schedulerMode: string) {
     this.hydrate(processList);
@@ -32,9 +33,7 @@ export default class SimulationEngine {
 
     const nextTime = events[0].time;
 
-    for (let t = this.time; t < nextTime; t++) {
-      this.createSnapshot(t);
-    }
+    for (let t = this.time; t < nextTime; t++) this.createSnapshot(t);
 
     this.time = nextTime;
     this.handleEvents(events);
@@ -53,6 +52,19 @@ export default class SimulationEngine {
   }
 
   createSnapshot(t: number) {
+    const item: snapshotItem = {
+      time: t,
+    };
+
+    for(let i = 0; i < this.processes.length; i++) {
+      const key = `process_${i}` as const;
+      item[key] = this.processes[i].state; 
+    }
+
+    item["notes"] = "";
+
+    this.snapshots.push(item);
+
     console.log(
       this.processes.map((p) => ({
         pid: p.pid,
@@ -109,5 +121,7 @@ export default class SimulationEngine {
       this.runStep();
       count++;
     }
+
+    return this.snapshots;
   }
 }
