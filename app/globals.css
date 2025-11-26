@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+:root {
   /* ===== Core OS Palette ===== */
   --color-os-background: oklch(0.17 0.01 260); /* deep neutral navy-gray background */
   --color-os-surface: oklch(0.22 0.015 260); /* slightly lighter layer for cards/panels */
@@ -14,10 +14,10 @@
   --color-os-muted: oklch(0.45 0.02 250); /* muted text and icons */
 
   /* ===== Process Visualization ===== */
-  --color-os-cpu: oklch(0.58 0.10 240); /* calm slate-blue for CPU bursts */
-  --color-os-io: oklch(0.56 0.09 160); /* muted teal for I/O operations */
-  --color-os-ready: oklch(0.60 0.08 130); /* soft green for ready queue */
-  --color-os-waiting: oklch(0.65 0.10 90); /* mellow amber for waiting state */
+  --color-os-running: oklch(0.58 0.10 240); /* calm slate-blue for CPU bursts */
+  --color-os-blocked: oklch(0.56 0.09 160); /* muted teal for I/O operations */
+  --color-os-new: oklch(0.60 0.08 130); /* soft green for ready queue */
+  --color-os-ready: oklch(0.65 0.10 90); /* mellow amber for waiting state */
   --color-os-terminated: oklch(0.55 0.12 25); /* restrained red-orange for terminated */
 
   /* ===== UI Elements ===== */
@@ -30,6 +30,18 @@
   /* ===== Typography & Shapes ===== */
   --font-sans: "Inter", system-ui, sans-serif;
   --radius-md: 0.5rem;
+}
+
+@theme {
+  colors: {
+    os: {
+      running: oklch(0.58 0.10 240);
+      ready: oklch(0.65 0.10 90);
+      blocked: oklch(0.56 0.09 160);
+      new: oklch(0.60 0.08 130);
+      terminated: oklch(0.55 0.12 25);
+    }
+  }
 }
 
 @theme inline {
@@ -149,3 +161,5 @@
     @apply bg-background text-foreground;
   }
 }
+
+
