@@ -110,6 +110,10 @@ export default class SimulationEngine {
     return Object.values(this.isTerminated).some(b => b === false);
   }
 
+  terminateAll() {
+
+  }
+
   runUntilFinished() {
     let count = 0;
     this.dispatchCpuIfIdle();
@@ -121,6 +125,8 @@ export default class SimulationEngine {
       this.runStep();
       count++;
     }
+
+    this.createSnapshot(this.time);
 
     return this.snapshots;
   }
